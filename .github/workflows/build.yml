@@ -1,0 +1,39 @@
+name: Build Project
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: JDK 1.8 Setup
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+
+      - name: Gradle Setup
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*','**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Gradle
+        run: chmod +x gradlew
+
+      - name: Build client
+        run: ./gradlew build
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Package
+          path: build/libs/*.jar
+
+      - name: Cleanup Gradle Cache
+        run: |
+          rm -rf ~/.gradle/caches/modules-2/modules-2.lock
+          rm -rf ~/.gradle/caches/modules-2/gc.properties
