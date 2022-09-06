@@ -27,7 +27,7 @@ dependencies {
     <dependency>
         <groupId>com.github.Wolfsurge</groupId>
         <artifactId>AnimationSystem</artifactId>
-        <version>Tag</version>
+        <version>1.0</version>
     </dependency>
 </dependencies>
 ```
