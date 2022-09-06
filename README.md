@@ -59,4 +59,6 @@ val y = 100.0 * animation.getAnimationFactor()
 
 The `resetToDefault` method instantly resets the animation to its original state.
 
+Need more help? Check out the src/test directory!
+
 

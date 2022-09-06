@@ -6,7 +6,7 @@ import java.util.function.Supplier
  * @author Surge
  * @since 26/07/2022
  */
-class Animation(private val length: Supplier<Float>, private val initialState: Boolean, val easing: Supplier<Easing>) {
+open class Animation(private val length: Supplier<Float>, private val initialState: Boolean, private val easing: Supplier<Easing>) {
 
     // Time since last state update
     private var lastMillis: Long = 0L
@@ -26,11 +26,26 @@ class Animation(private val length: Supplier<Float>, private val initialState: B
         }
 
     /**
+     * Constructor that does not take suppliers as parameters
+     */
+    constructor(length: Float, initialState: Boolean, easing: Easing) : this({ length }, initialState, { easing })
+
+    /**
+     * Constructor that only takes one supplier (length) and an immutable easing
+     */
+    constructor(length: Supplier<Float>, initialState: Boolean, easing: Easing) : this(length, initialState, { easing })
+
+    /**
+     * Constructor that only takes one supplier (easing) and an immutable length
+     */
+    constructor(length: Float, initialState: Boolean, easing: Supplier<Easing>) : this({ length }, initialState, easing)
+
+    /**
      * Gets the animation factor (value between 0 and 1)
      *
      * @return The animation factor
      */
-    fun getAnimationFactor(): Double = if (state) {
+    open fun getAnimationFactor(): Double = if (state) {
         easing.get().ease(clamp((System.currentTimeMillis() - lastMillis.toDouble()) / length.get().toDouble(), 0.0, 1.0))
     } else {
         easing.get().ease(clamp(1 - (System.currentTimeMillis() - lastMillis.toDouble()) / length.get().toDouble(), 0.0, 1.0))
