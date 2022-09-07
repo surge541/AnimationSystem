@@ -1,12 +1,10 @@
 package me.surge.animation
 
-import java.util.function.Supplier
-
 /**
  * @author Surge
  * @since 26/07/2022
  */
-open class Animation(private val length: Supplier<Float>, private val initialState: Boolean, private val easing: Supplier<Easing>) {
+open class Animation(val length: () -> Float, val initialState: Boolean, val easing: () -> Easing) {
 
     // Time since last state update
     private var lastMillis: Long = 0L
@@ -17,9 +15,9 @@ open class Animation(private val length: Supplier<Float>, private val initialSta
     var state: Boolean = initialState
         set(value) {
             lastMillis = if (!value) {
-                System.currentTimeMillis() - ((1 - getLinearFactor()) * length.get().toLong()).toLong()
+                System.currentTimeMillis() - ((1 - getLinearFactor()) * length.invoke().toLong()).toLong()
             } else {
-                System.currentTimeMillis() - (getLinearFactor() * length.get().toLong()).toLong()
+                System.currentTimeMillis() - (getLinearFactor() * length.invoke().toLong()).toLong()
             }
 
             field = value
@@ -33,12 +31,12 @@ open class Animation(private val length: Supplier<Float>, private val initialSta
     /**
      * Constructor that only takes one supplier (length) and an immutable easing
      */
-    constructor(length: Supplier<Float>, initialState: Boolean, easing: Easing) : this(length, initialState, { easing })
+    constructor(length: () -> Float, initialState: Boolean, easing: Easing) : this(length, initialState, { easing })
 
     /**
      * Constructor that only takes one supplier (easing) and an immutable length
      */
-    constructor(length: Float, initialState: Boolean, easing: Supplier<Easing>) : this({ length }, initialState, easing)
+    constructor(length: Float, initialState: Boolean, easing: () -> Easing) : this({ length }, initialState, easing)
 
     /**
      * Gets the animation factor (value between 0 and 1)
@@ -46,9 +44,9 @@ open class Animation(private val length: Supplier<Float>, private val initialSta
      * @return The animation factor
      */
     open fun getAnimationFactor(): Double = if (state) {
-        easing.get().ease(clamp((System.currentTimeMillis() - lastMillis.toDouble()) / length.get().toDouble(), 0.0, 1.0))
+        easing.invoke().ease(((System.currentTimeMillis() - lastMillis.toDouble()) / length.invoke().toDouble()).coerceIn(0.0, 1.0))
     } else {
-        easing.get().ease(clamp(1 - (System.currentTimeMillis() - lastMillis.toDouble()) / length.get().toDouble(), 0.0, 1.0))
+        easing.invoke().ease((1 - (System.currentTimeMillis() - lastMillis.toDouble()) / length.invoke().toDouble()).coerceIn(0.0, 1.0))
     }
 
     /**
@@ -58,29 +56,15 @@ open class Animation(private val length: Supplier<Float>, private val initialSta
         state = initialState
 
         lastMillis = if (initialState) {
-            System.currentTimeMillis() - ((1 - getLinearFactor()) * length.get().toLong()).toLong()
+            System.currentTimeMillis() - ((1 - getLinearFactor()) * length.invoke().toLong()).toLong()
         } else {
-            System.currentTimeMillis() - (getLinearFactor() * length.get().toLong()).toLong()
+            System.currentTimeMillis() - (getLinearFactor() * length.invoke().toLong()).toLong()
         }
     }
 
     /**
      * For internal use only!
      */
-    private fun getLinearFactor(): Double = if (!state) clamp(
-        1 - (System.currentTimeMillis() - lastMillis.toDouble()) / length.get().toDouble(),
-        0.0,
-        1.0
-    ) else clamp((System.currentTimeMillis() - lastMillis.toDouble()) / length.get().toDouble(), 0.0, 1.0)
-
-    private fun clamp(value: Double, min: Double, max: Double): Double {
-        return if (value < min) {
-            min
-        } else if (value > max) {
-            max
-        } else {
-            value
-        }
-    }
+    private fun getLinearFactor(): Double = if (!state) { (1 - (System.currentTimeMillis() - lastMillis.toDouble()) / length.invoke().toDouble()).coerceIn(0.0, 1.0) } else { ((System.currentTimeMillis() - lastMillis.toDouble()) / length.invoke().toDouble()).coerceIn(0.0, 1.0) }
 
 }

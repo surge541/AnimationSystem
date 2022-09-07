@@ -1,15 +1,15 @@
 package me.surge.animation
 
 import java.awt.Color
-import java.util.function.Supplier
 
 /**
  * @author Surge
  * @since 06/09/2022
  *
  * I'M SORRY AMERICANS BUT LIKE I'M WELSH SO I'M SPELLING IT WITH A U
+ * at least I didn't spell it the Welsh way (lliw)
  */
-class ColourAnimation(val from: Color, val to: Color, length: Supplier<Float>, initialState: Boolean, easing: Supplier<Easing>) : Animation(length, initialState, easing) {
+class ColourAnimation(val from: Color, val to: Color, length: () -> Float, initialState: Boolean, easing: () -> Easing) : Animation(length, initialState, easing) {
 
     /********************* CONSTRUCTORS *********************/
 
@@ -21,12 +21,12 @@ class ColourAnimation(val from: Color, val to: Color, length: Supplier<Float>, i
     /**
      * Constructor that only takes one supplier (length) and an immutable easing
      */
-    constructor(from: Color, to: Color, length: Supplier<Float>, initialState: Boolean, easing: Easing) : this(from, to, length, initialState, { easing })
+    constructor(from: Color, to: Color, length: () -> Float, initialState: Boolean, easing: Easing) : this(from, to, length, initialState, { easing })
 
     /**
      * Constructor that only takes one supplier (easing) and an immutable length
      */
-    constructor(from: Color, to: Color, length: Float, initialState: Boolean, easing: Supplier<Easing>) : this(from, to, { length }, initialState, easing)
+    constructor(from: Color, to: Color, length: Float, initialState: Boolean, easing: () -> Easing) : this(from, to, { length }, initialState, easing)
 
     /**
      * Gets the transitioned colour
@@ -38,7 +38,8 @@ class ColourAnimation(val from: Color, val to: Color, length: Supplier<Float>, i
             (from.red + (to.red - from.red) * factor).toInt(),
             (from.green + (to.green - from.green) * factor).toInt(),
             (from.blue + (to.blue - from.blue) * factor).toInt(),
-            (from.alpha + (to.alpha - from.alpha) * factor).toInt())
+            (from.alpha + (to.alpha - from.alpha) * factor).toInt()
+        )
     }
 
 }

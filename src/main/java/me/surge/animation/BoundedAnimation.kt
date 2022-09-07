@@ -1,14 +1,12 @@
 package me.surge.animation
 
-import java.util.function.Supplier
-
 /**
  * @author Surge
  * @since 06/09/2022
  *
  * I was debating whether to have @param minimum and @param maximum as suppliers, but there would be too many constructors to make :P
  */
-class BoundedAnimation(var minimum: Float, var maximum: Float, length: Supplier<Float>, initialState: Boolean, easing: Supplier<Easing>) : Animation(length, initialState, easing) {
+class BoundedAnimation(var minimum: Float, var maximum: Float, length: () -> Float, initialState: Boolean, easing: () -> Easing) : Animation(length, initialState, easing) {
 
     /********************* CONSTRUCTORS *********************/
 
@@ -31,12 +29,12 @@ class BoundedAnimation(var minimum: Float, var maximum: Float, length: Supplier<
     /**
      * Constructor that only takes one supplier (length) and an immutable easing
      */
-    constructor(minimum: Float, maximum: Float,length: Supplier<Float>, initialState: Boolean, easing: Easing) : this(minimum, maximum, length, initialState, { easing })
+    constructor(minimum: Float, maximum: Float, length: () -> Float, initialState: Boolean, easing: Easing) : this(minimum, maximum, length, initialState, { easing })
 
     /**
      * Constructor that only takes one supplier (easing) and an immutable length
      */
-    constructor(minimum: Float, maximum: Float,length: Float, initialState: Boolean, easing: Supplier<Easing>) : this(minimum, maximum, { length }, initialState, easing)
+    constructor(minimum: Float, maximum: Float, length: Float, initialState: Boolean, easing: () -> Easing) : this(minimum, maximum, { length }, initialState, easing)
 
     override fun getAnimationFactor(): Double {
         return minimum + ((maximum - minimum) * super.getAnimationFactor())
